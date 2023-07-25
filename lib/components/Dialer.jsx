@@ -59,6 +59,13 @@ export default class Dialer extends React.Component
 						disabled={!this._canCall() || !state.uri}
 						onClick={this.handleClickCall.bind(this)}
 					/>
+
+					<RaisedButton
+						label='Send Message'
+						primary
+						disabled={!this._canCall() || !state.uri}
+						onClick={this.handleClickSendMessage.bind(this)}
+					/>
 				</form>
 			</div>
 		);
@@ -88,6 +95,13 @@ export default class Dialer extends React.Component
 		this._doCall();
 	}
 
+	handleClickSendMessage()
+	{
+		logger.debug('handleClickSendMessage()');
+
+		this._doSendMessage();
+	}
+
 	_doCall()
 	{
 		const uri = this.state.uri;
@@ -96,6 +110,16 @@ export default class Dialer extends React.Component
 
 		this.setState({ uri: '' });
 		this.props.onCall(uri);
+	}
+
+	_doSendMessage()
+	{
+		const uri = this.state.uri;
+
+		logger.debug('_doSendMessage() [uri:"%s"]', uri);
+
+		this.setState({ uri: '' });
+		this.props.onSendMessage(uri);
 	}
 
 	_canCall()

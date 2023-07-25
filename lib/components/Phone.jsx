@@ -95,6 +95,7 @@ export default class Phone extends React.Component
 							busy={Boolean(state.session || state.incomingSession)}
 							callme={this._u.query.callme}
 							onCall={this.handleOutgoingCall.bind(this)}
+							onSendMessage={this.handleOutgoingMessage.bind(this)}
 						/>
 					</header>
 
@@ -354,6 +355,62 @@ export default class Phone extends React.Component
 	handleOutgoingCall(uri)
 	{
 		logger.debug('handleOutgoingCall() [uri:"%s"]', uri);
+
+		const session = this._ua.call(uri,
+			{
+				pcConfig         : this.props.settings.pcConfig || { iceServers: [] },
+				mediaConstraints :
+				{
+					audio : true,
+					video : true
+				},
+				rtcOfferConstraints :
+				{
+					offerToReceiveAudio : 1,
+					offerToReceiveVideo : 1
+				}
+			});
+
+		session.on('connecting', () =>
+		{
+			this.setState({ session });
+		});
+
+		session.on('progress', () =>
+		{
+			audioPlayer.play('ringback');
+		});
+
+		session.on('failed', (data) =>
+		{
+			audioPlayer.stop('ringback');
+			audioPlayer.play('rejected');
+			this.setState({ session: null });
+
+			this.props.onNotify(
+				{
+					level   : 'error',
+					title   : 'Call failed',
+					message : data.cause
+				});
+		});
+
+		session.on('ended', () =>
+		{
+			audioPlayer.stop('ringback');
+			this.setState({ session: null });
+		});
+
+		session.on('accepted', () =>
+		{
+			audioPlayer.stop('ringback');
+			audioPlayer.play('answered');
+		});
+	}
+
+	handleOutgoingMessage(uri)
+	{
+		logger.debug('handleOutgoingMessage() [uri:"%s"]', uri);
 
 		const session = this._ua.call(uri,
 			{
