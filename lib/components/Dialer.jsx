@@ -63,7 +63,7 @@ export default class Dialer extends React.Component
 					<RaisedButton
 						label='Send Message'
 						primary
-						disabled={!this._canCall() || !state.uri}
+						disabled={!this._inCall()}
 						onClick={this.handleClickSendMessage.bind(this)}
 					/>
 				</form>
@@ -130,6 +130,12 @@ export default class Dialer extends React.Component
 			!props.busy &&
 			(props.status === 'connected' || props.status === 'registered')
 		);
+	}
+
+	_inCall() {
+		const props = this.props;
+
+		return props.status === 'inCall';
 	}
 }
 

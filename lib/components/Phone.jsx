@@ -5,7 +5,7 @@ import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
 import IconButton from 'material-ui/IconButton/IconButton';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
-import JsSIP from 'jssip';
+import JsSIP from '../../lib/jssip.min.js';
 import UrlParse from 'url-parse';
 import Logger from '../Logger';
 import audioPlayer from '../audioPlayer';
@@ -299,7 +299,8 @@ export default class Phone extends React.Component
 				this.setState(
 					{
 						session         : session,
-						incomingSession : null
+						incomingSession : null,
+						status           : 'inCall'
 					});
 			});
 		});
@@ -426,42 +427,6 @@ export default class Phone extends React.Component
 					offerToReceiveVideo : 1
 				}
 			});
-
-		session.on('connecting', () =>
-		{
-			this.setState({ session });
-		});
-
-		session.on('progress', () =>
-		{
-			audioPlayer.play('ringback');
-		});
-
-		session.on('failed', (data) =>
-		{
-			audioPlayer.stop('ringback');
-			audioPlayer.play('rejected');
-			this.setState({ session: null });
-
-			this.props.onNotify(
-				{
-					level   : 'error',
-					title   : 'Call failed',
-					message : data.cause
-				});
-		});
-
-		session.on('ended', () =>
-		{
-			audioPlayer.stop('ringback');
-			this.setState({ session: null });
-		});
-
-		session.on('accepted', () =>
-		{
-			audioPlayer.stop('ringback');
-			audioPlayer.play('answered');
-		});
 	}
 
 	handleAnswerIncoming()
@@ -473,6 +438,11 @@ export default class Phone extends React.Component
 		session.answer(
 			{
 				pcConfig : this.props.settings.pcConfig || { iceServers: [] }
+			});
+
+		this.setState(
+			{
+				status : 'inCall'
 			});
 	}
 
