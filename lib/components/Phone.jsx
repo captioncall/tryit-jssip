@@ -299,8 +299,7 @@ export default class Phone extends React.Component
 				this.setState(
 					{
 						session         : session,
-						incomingSession : null,
-						status           : 'inCall'
+						incomingSession : null
 					});
 			});
 		});
@@ -413,22 +412,12 @@ export default class Phone extends React.Component
 	{
 		logger.debug('handleOutgoingMessage() [uri:"%s"]', uri);
 
-		const session = this._ua.call(uri,
-			{
-				pcConfig         : this.props.settings.pcConfig || { iceServers: [] },
-				mediaConstraints :
-				{
-					audio : true,
-					video : true
-				},
-				rtcOfferConstraints :
-				{
-					offerToReceiveAudio : 1,
-					offerToReceiveVideo : 1
-				}
-			});
-	}
+		const session = this.session;
+		console.log(session)
+		console.log(session.sendMessage)
+		session.sendMessage(uri, "<TwoOnCall />")
 
+	}
 	handleAnswerIncoming()
 	{
 		logger.debug('handleAnswerIncoming()');
@@ -438,11 +427,6 @@ export default class Phone extends React.Component
 		session.answer(
 			{
 				pcConfig : this.props.settings.pcConfig || { iceServers: [] }
-			});
-
-		this.setState(
-			{
-				status : 'inCall'
 			});
 	}
 
