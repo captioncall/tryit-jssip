@@ -408,14 +408,13 @@ export default class Phone extends React.Component
 		});
 	}
 
-	handleOutgoingMessage(uri)
+	handleOutgoingMessage(message)
 	{
-		logger.debug('handleOutgoingMessage() [uri:"%s"]', uri);
+		logger.debug('handleOutgoingMessage() [message:"%s"]', message);
 
-		const session = this.session;
-		console.log(session)
-		console.log(session.sendMessage)
-		session.sendMessage(uri, "<TwoOnCall />")
+		const session = this.state.session;
+
+		session.sendMessage('text/plain', message)
 
 	}
 	handleAnswerIncoming()

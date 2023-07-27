@@ -9,75 +9,97 @@ import UserChip from './UserChip';
 
 const logger = new Logger('Dialer');
 
-export default class Dialer extends React.Component
-{
-	constructor(props)
-	{
+export default class Dialer extends React.Component {
+	constructor(props) {
 		super(props);
 
 		this.state =
 		{
-			uri : props.callme || ''
+			uri: props.callme || '',
+			message: ''
 		};
 	}
 
-	render()
-	{
+	render() {
 		const state = this.state;
 		const props = this.props;
 		const settings = props.settings;
 
 		return (
-			<div data-component='Dialer'>
-				<div className='userchip-container'>
-					<UserChip
-						name={settings.display_name}
-						uri={settings.uri || ''}
-						status={props.status}
-						fullWidth
-					/>
-				</div>
-
-				<form
-					className={classnames('uri-form', { hidden: props.busy && utils.isMobile() })}
-					action=''
-					onSubmit={this.handleSubmit.bind(this)}
-				>
-					<div className='uri-container'>
-						<TextField
-							hintText='SIP URI or username'
+			<div>
+				<div data-component='Dialer'>
+					<div className='userchip-container'>
+						<UserChip
+							name={settings.display_name}
+							uri={settings.uri || ''}
+							status={props.status}
 							fullWidth
-							disabled={!this._canCall()}
-							value={state.uri}
-							onChange={this.handleUriChange.bind(this)}
 						/>
 					</div>
 
-					<RaisedButton
-						label='Call'
-						primary
-						disabled={!this._canCall() || !state.uri}
-						onClick={this.handleClickCall.bind(this)}
-					/>
+					<form
+						className={classnames('uri-form', { hidden: props.busy && utils.isMobile() })}
+						action=''
+						onSubmit={this.handleSubmit.bind(this)}
+					>
+						<div className='uri-container'>
+							<TextField
+								hintText='SIP URI or username'
+								fullWidth
+								disabled={!this._canCall()}
+								value={state.uri}
+								onChange={this.handleUriChange.bind(this)}
+							/>
+						</div>
 
-					<RaisedButton
-						label='Send Message'
-						primary
-						disabled={false}
-						onClick={this.handleClickSendMessage.bind(this)}
-					/>
-				</form>
+						<RaisedButton
+							label='Call'
+							primary
+							disabled={!this._canCall() || !state.uri}
+							onClick={this.handleClickCall.bind(this)}
+						/>
+					</form>
+				</div>
+				<If condition={props.busy}>
+					<div data-component='Dialer'>
+						<form
+							className={classnames('uri-form', { hidden: props.busy && utils.isMobile() })}
+							action=''
+							onSubmit={this.handleSubmit.bind(this)}
+						>
+							<div className='uri-container'>
+								<TextField
+									hintText='Enter a message...'
+									fullWidth
+									disabled={false}
+									value={state.message}
+									onChange={this.handleMessageChange.bind(this)}
+								/>
+							</div>
+
+							<RaisedButton
+								label='Message'
+								primary
+								disabled={false}
+								onClick={this.handleClickSendMessage.bind(this)}
+							/>
+						</form>
+					</div>
+				</If>
 			</div>
+
 		);
 	}
 
-	handleUriChange(event)
-	{
+	handleUriChange(event) {
 		this.setState({ uri: event.target.value });
 	}
 
-	handleSubmit(event)
-	{
+	handleMessageChange(event) {
+		this.setState({ message: event.target.value });
+	}
+
+	handleSubmit(event) {
 		logger.debug('handleSubmit()');
 
 		event.preventDefault();
@@ -88,41 +110,36 @@ export default class Dialer extends React.Component
 		this._doCall();
 	}
 
-	handleClickCall()
-	{
+	handleClickCall() {
 		logger.debug('handleClickCall()');
 
 		this._doCall();
 	}
 
-	handleClickSendMessage()
-	{
+	handleClickSendMessage() {
 		logger.debug('handleClickSendMessage()');
 
 		this._doSendMessage();
 	}
 
-	_doCall()
-	{
+	_doCall() {
 		const uri = this.state.uri;
 
 		logger.debug('_doCall() [uri:"%s"]', uri);
 
-		//this.setState({ uri: '' });
+		this.setState({ uri: '' });
 		this.props.onCall(uri);
 	}
 
-	_doSendMessage()
-	{
-		const uri = this.state.uri;
+	_doSendMessage() {
+		const message = this.state.message;
 
-		logger.debug('_doSendMessage() [uri:"%s"]', uri);
+		logger.debug('_doSendMessage() [message:"%s"]', message);
 
-		this.props.onSendMessage(uri);
+		this.props.onSendMessage(message);
 	}
 
-	_canCall()
-	{
+	_canCall() {
 		const props = this.props;
 
 		return (
@@ -134,9 +151,9 @@ export default class Dialer extends React.Component
 
 Dialer.propTypes =
 {
-	settings : PropTypes.object.isRequired,
-	status   : PropTypes.string.isRequired,
-	busy     : PropTypes.bool.isRequired,
-	callme   : PropTypes.string,
-	onCall   : PropTypes.func.isRequired
+	settings: PropTypes.object.isRequired,
+	status: PropTypes.string.isRequired,
+	busy: PropTypes.bool.isRequired,
+	callme: PropTypes.string,
+	onCall: PropTypes.func.isRequired
 };
